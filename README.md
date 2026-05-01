@@ -1,8 +1,8 @@
-# ⚽ Football AI VAR — Video Assistant Referee
+# Linesman - Video Assistant Referee
 
-An AI-powered Video Assistant Referee that analyzes football match clips and makes foul/no-foul decisions using computer vision and large language models.
+Linesman is a Video Assistant Referee (VAR) system that analyzes football match footage to evaluate incidents and make foul decisions according to FIFA Law 12. It utilizes a two-stage pipeline combining computer vision and multimodal large language models for objective analysis.
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 Video Upload → Stage 1: YOLOv8 Pose Detection → Stage 2: Gemini Video Analysis → Stage 3: LLM Rules Engine → VAR Decision
@@ -11,10 +11,10 @@ Video Upload → Stage 1: YOLOv8 Pose Detection → Stage 2: Gemini Video Analys
 | Stage | Tool | What It Does |
 |-------|------|-------------|
 | **1** | YOLOv8x-pose + ByteTrack | Detects players, extracts 17-point pose skeletons, tracks IDs, computes velocities, finds contact zones |
-| **2** | Gemini 2.5 Pro (video) | Watches the video natively — analyzes ball possession, contact point, challenge type, force, intent |
-| **3** | Gemini 2.5 Pro (text) | Receives all evidence, applies FIFA Law 12, outputs structured foul decision with reasoning |
+| **2** | Gemini 2.5 Pro (video) | Analyzes temporal features including ball possession, contact points, challenge type, force, and intent |
+| **3** | Gemini 2.5 Pro (text) | Aggregates evidence, applies FIFA Law 12, and outputs a structured decision with supporting reasoning |
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Get a Gemini API Key
 
@@ -48,7 +48,7 @@ Navigate to [http://localhost:8000](http://localhost:8000) in your browser.
 
 Upload a 5-30 second video clip of a football incident and wait for the analysis (~30-90 seconds).
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 AI var/
@@ -71,14 +71,14 @@ AI var/
 └── README.md
 ```
 
-## 🎯 Tips for Best Results
+## Tips for Best Results
 
 - Use **5-30 second clips** focused on the incident
 - **Broadcast quality** footage works better than phone recordings
 - Include a few seconds **before and after** the incident for context
 - Clear view of the challenge (not too far, not too close)
 
-## 🔧 Configuration
+## Configuration
 
 You can adjust these in the source code:
 
