@@ -3,97 +3,135 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Linesman</title>
+<title>Linesman | AI VAR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0a0a0a;
-    --surface: #111;
-    --border: #1e1e1e;
-    --border-hover: #2e2e2e;
-    --text: #f0f0f0;
-    --muted: #555;
-    --dim: #333;
-    --red: #e02020;
-    --red-dim: rgba(224, 32, 32, 0.12);
-    --yellow: #d4a017;
-    --green: #2a9d5c;
+    --bg: #050507;
+    --surface: rgba(255, 255, 255, 0.03);
+    --border: rgba(255, 255, 255, 0.07);
+    --border-hover: rgba(255, 255, 255, 0.15);
+    --text: #ffffff;
+    --muted: #8b949e;
+    --dim: rgba(255, 255, 255, 0.1);
+    --red: #ff3366;
+    --red-dim: rgba(255, 51, 102, 0.15);
+    --yellow: #f1c40f;
+    --green: #00d26a;
+    --cyan: #00e5ff;
   }
 
   html, body {
     height: 100%;
-    background: var(--bg);
+    background-color: var(--bg);
     color: var(--text);
-    font-family: -apple-system, "SF Pro Text", "SF Pro Display", BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Background Glow Effects */
+  .bg-glow {
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,51,102,0.15) 0%, rgba(0,0,0,0) 70%);
+    top: -200px;
+    left: -200px;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .bg-glow.right {
+    background: radial-gradient(circle, rgba(0,229,255,0.1) 0%, rgba(0,0,0,0) 70%);
+    top: auto;
+    bottom: -200px;
+    left: auto;
+    right: -200px;
   }
 
   .wrap {
-    max-width: 640px;
+    max-width: 680px;
     margin: 0 auto;
-    padding: 80px 24px 120px;
+    padding: 60px 24px 120px;
+    position: relative;
+    z-index: 1;
   }
 
   nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 28px 32px;
+    padding: 24px 32px;
+    background: rgba(5, 5, 7, 0.6);
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
   }
   .nav-logo {
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    background: linear-gradient(90deg, #fff, #a0aab2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .nav-dot {
-    width: 7px; height: 7px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: var(--red);
-    animation: breathe 2.5s ease-in-out infinite;
+    box-shadow: 0 0 12px var(--red);
+    animation: breathe 2s ease-in-out infinite;
   }
   @keyframes breathe {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
   }
 
   .hero {
-    padding-top: 72px;
-    padding-bottom: 56px;
+    padding-top: 60px;
+    padding-bottom: 48px;
     text-align: center;
   }
   .hero h1 {
-    font-size: clamp(36px, 6vw, 52px);
-    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(40px, 8vw, 64px);
+    font-weight: 800;
     letter-spacing: -1.5px;
     line-height: 1.05;
-    color: var(--text);
     margin-bottom: 16px;
   }
   .hero h1 em {
     font-style: normal;
-    color: var(--red);
+    background: linear-gradient(135deg, #ff3366, #ff7a59);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .hero p {
-    font-size: 15px;
-    color: var(--muted);
-    line-height: 1.6;
-    font-weight: 400;
+  .hero p.subtitle {
+    font-size: 18px;
+    color: #fff;
+    font-weight: 500;
+    margin-bottom: 12px;
+    letter-spacing: -0.2px;
   }
   .hero .desc {
-    margin: 16px auto 0;
-    font-size: 14px;
+    margin: 0 auto;
+    font-size: 15px;
     color: var(--muted);
-    line-height: 1.6;
-    max-width: 540px;
+    line-height: 1.7;
+    max-width: 580px;
   }
 
   .features {
     display: flex;
     gap: 16px;
-    margin-bottom: 40px;
+    margin-bottom: 48px;
   }
   @media (max-width: 480px) {
     .features { flex-direction: column; }
@@ -101,189 +139,224 @@
   .feature-card {
     flex: 1;
     background: var(--surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    transition: border-color 0.2s;
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
   .feature-card:hover {
-    border-color: var(--border-hover);
+    border-color: rgba(255,51,102,0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
   }
   .feature-card svg {
-    width: 22px; height: 22px; stroke: var(--red); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 12px;
+    width: 24px; height: 24px; stroke: var(--cyan); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 16px;
   }
   .feature-card h3 {
-    font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; letter-spacing: -0.2px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;
   }
   .feature-card p {
-    font-size: 13px; color: var(--muted); line-height: 1.5;
+    font-size: 14px; color: var(--muted); line-height: 1.6;
   }
 
   .upload-zone {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 52px 32px;
+    border: 2px dashed var(--border);
+    border-radius: 20px;
+    padding: 64px 32px;
     text-align: center;
     cursor: pointer;
     position: relative;
-    background: var(--surface);
-    transition: border-color 0.2s, background 0.2s;
+    background: linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.03) 100%);
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  .upload-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(0, 229, 255, 0.1), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .upload-zone:hover::before, .upload-zone.drag-over::before {
+    opacity: 1;
   }
   .upload-zone:hover, .upload-zone.drag-over {
-    border-color: var(--border-hover);
-    background: #141414;
+    border-color: var(--cyan);
+    transform: scale(1.02);
   }
   .upload-zone input {
     position: absolute; inset: 0;
     opacity: 0; cursor: pointer;
     width: 100%; height: 100%;
+    z-index: 10;
   }
 
   .upload-icon {
-    width: 44px; height: 44px;
+    width: 56px; height: 56px;
     margin: 0 auto 20px;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 10px;
-    background: #181818;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.05);
     border: 1px solid var(--border);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 2;
   }
-  .upload-icon svg { width: 20px; height: 20px; stroke: var(--muted); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .upload-icon svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
   .upload-label {
-    font-size: 15px;
-    font-weight: 500;
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
     color: var(--text);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 2;
   }
   .upload-sub {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--muted);
+    position: relative;
+    z-index: 2;
   }
 
   .file-row {
     display: none;
-    margin-top: 24px;
+    margin-top: 32px;
     padding-top: 24px;
     border-top: 1px solid var(--border);
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    position: relative;
+    z-index: 2;
   }
   .file-row.visible { display: flex; }
   .file-name-txt {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 300px;
+    text-align: left;
   }
-  .file-size-txt { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .check { color: var(--green); font-size: 16px; }
+  .file-size-txt { font-size: 13px; color: var(--muted); margin-top: 4px; text-align: left;}
+  .check { color: var(--green); font-size: 18px; }
 
   video#thumb {
     display: none;
     width: 100%;
-    max-height: 220px;
+    max-height: 280px;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 16px;
     border: 1px solid var(--border);
-    margin-top: 16px;
+    margin-top: 24px;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.5);
   }
   video#thumb.visible { display: block; }
 
   .btn {
     display: none;
     width: 100%;
-    margin-top: 16px;
-    padding: 15px;
-    background: var(--red);
+    margin-top: 24px;
+    padding: 16px;
+    background: linear-gradient(135deg, #ff3366, #ff0044);
     border: none;
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.2px;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
     color: #fff;
     cursor: pointer;
-    transition: opacity 0.15s;
+    transition: all 0.2s ease;
+    box-shadow: 0 8px 24px rgba(255, 51, 102, 0.3);
   }
   .btn.visible { display: block; }
-  .btn:hover { opacity: 0.88; }
-  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255, 51, 102, 0.4); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
   .proc {
     display: none;
-    margin-top: 32px;
-    padding: 28px;
+    margin-top: 40px;
+    padding: 32px;
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 16px;
     background: var(--surface);
+    backdrop-filter: blur(16px);
   }
   .proc.visible { display: block; }
 
   .proc-title {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: 0.3px;
-    margin-bottom: 20px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cyan);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
   }
   .spinner {
-    width: 12px; height: 12px;
-    border: 1.5px solid var(--dim);
-    border-top-color: var(--red);
+    width: 16px; height: 16px;
+    border: 2px solid var(--dim);
+    border-top-color: var(--cyan);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     flex-shrink: 0;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .steps { display: flex; flex-direction: column; gap: 12px; }
+  .steps { display: flex; flex-direction: column; gap: 16px; }
   .step {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 13px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
     color: var(--muted);
-    transition: color 0.25s;
+    transition: color 0.3s;
   }
-  .step.active { color: var(--text); }
+  .step.active { color: #fff; }
   .step.done { color: var(--green); }
   .step-dot {
-    width: 5px; height: 5px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: var(--dim);
     flex-shrink: 0;
-    transition: background 0.25s;
+    transition: all 0.3s;
   }
-  .step.active .step-dot { background: var(--red); }
+  .step.active .step-dot { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
   .step.done .step-dot { background: var(--green); }
 
   .prog-track {
-    margin-top: 24px;
-    height: 1px;
+    margin-top: 32px;
+    height: 4px;
     background: var(--border);
-    border-radius: 2px;
+    border-radius: 4px;
     overflow: hidden;
   }
   .prog-fill {
     height: 100%;
-    background: var(--red);
+    background: linear-gradient(90deg, var(--cyan), var(--red));
     width: 0%;
-    transition: width 0.6s ease;
+    transition: width 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
 
   .results {
     display: none;
-    margin-top: 40px;
-    animation: up 0.4s ease forwards;
+    margin-top: 48px;
+    animation: up 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
   }
   .results.visible { display: block; }
   @keyframes up {
-    from { opacity: 0; transform: translateY(12px); }
+    from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
@@ -291,67 +364,90 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    backdrop-filter: blur(16px);
   }
   .verdict-pill {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    padding: 6px 14px;
+    padding: 8px 20px;
     border-radius: 100px;
   }
   .verdict-pill.foul, .verdict-pill.penalty, .verdict-pill.red_card {
     background: var(--red-dim);
     color: var(--red);
-    border: 1px solid rgba(224,32,32,0.25);
+    border: 1px solid rgba(255, 51, 102, 0.3);
+    box-shadow: 0 0 20px rgba(255, 51, 102, 0.2);
   }
   .verdict-pill.yellow_card {
-    background: rgba(212,160,23,0.1);
+    background: rgba(241,196,15,0.1);
     color: var(--yellow);
-    border: 1px solid rgba(212,160,23,0.25);
+    border: 1px solid rgba(241,196,15,0.3);
+    box-shadow: 0 0 20px rgba(241,196,15,0.2);
   }
   .verdict-pill.no_foul {
-    background: rgba(42,157,92,0.1);
+    background: rgba(0,210,106,0.1);
     color: var(--green);
-    border: 1px solid rgba(42,157,92,0.25);
+    border: 1px solid rgba(0,210,106,0.3);
+    box-shadow: 0 0 20px rgba(0,210,106,0.2);
   }
   .conf {
-    font-size: 28px;
-    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
     letter-spacing: -1px;
     color: var(--text);
+    line-height: 1;
   }
   .conf-label {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--muted);
     text-align: right;
-    margin-top: 2px;
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
   }
 
   .grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 8px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
   }
-  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
 
   .cell {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(16px);
   }
   .cell-label {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--muted);
-    margin-bottom: 6px;
-    font-weight: 400;
+    margin-bottom: 8px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   .cell-value {
-    font-size: 14px;
-    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
     color: var(--text);
     letter-spacing: -0.2px;
     text-transform: capitalize;
@@ -363,48 +459,56 @@
   .panel {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 16px;
     overflow: hidden;
-    margin-top: 8px;
+    margin-top: 12px;
+    backdrop-filter: blur(16px);
   }
   .panel-head {
-    padding: 12px 16px;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--border);
-    font-size: 11px;
-    color: var(--muted);
-    font-weight: 500;
-    letter-spacing: 0.2px;
+    font-size: 13px;
+    color: var(--cyan);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
   }
   .panel-body {
-    padding: 16px;
-    font-size: 13px;
-    line-height: 1.7;
-    color: #888;
-    max-height: 200px;
+    padding: 20px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #e1e4e8;
+    max-height: 250px;
     overflow-y: auto;
   }
-  .panel-body::-webkit-scrollbar { width: 3px; }
-  .panel-body::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 4px; }
+  .panel-body::-webkit-scrollbar { width: 4px; }
+  .panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
 
   .btn-ghost {
-    margin-top: 24px;
-    background: none;
+    display: block;
+    width: 100%;
+    margin-top: 32px;
+    background: rgba(255,255,255,0.02);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 11px 20px;
-    font-family: inherit;
-    font-size: 13px;
-    color: var(--muted);
+    border-radius: 12px;
+    padding: 16px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+    transition: all 0.2s ease;
   }
-  .btn-ghost:hover { border-color: var(--dim); color: var(--text); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
 </style>
 </head>
 <body>
 
+<div class="bg-glow"></div>
+<div class="bg-glow right"></div>
+
 <nav>
-  <span class="nav-logo">Linesman</span>
+  <span class="nav-logo">LINESMAN</span>
   <div class="nav-dot"></div>
 </nav>
 
@@ -412,7 +516,7 @@
 
   <div class="hero">
     <h1>The ref that never <em>blinks.</em></h1>
-    <p>Drop a clip. Get the call.</p>
+    <p class="subtitle">Drop a clip. Get the precise call.</p>
     <p class="desc">Linesman is an AI-powered Video Assistant Referee that analyzes football incidents. It uses <strong>YOLOv8</strong> for precise player tracking and pose estimation, combined with <strong>Gemini's</strong> multimodal reasoning to evaluate fouls according to FIFA Law 12.</p>
   </div>
 
@@ -434,8 +538,8 @@
     <div class="upload-icon">
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     </div>
-    <div class="upload-label">Drop clip here</div>
-    <div class="upload-sub">MP4, MOV, AVI · up to 500MB</div>
+    <div class="upload-label">Drag & drop your clip here</div>
+    <div class="upload-sub">Supports MP4, MOV, AVI (up to 500MB)</div>
 
     <div class="file-row" id="fileRow">
       <div>
@@ -448,15 +552,15 @@
 
   <video id="thumb" muted playsinline loop></video>
 
-  <button class="btn" id="btnGo">Analyze</button>
+  <button class="btn" id="btnGo">Analyze Incident</button>
 
   <div class="proc" id="proc">
-    <div class="proc-title"><div class="spinner"></div> Reviewing incident</div>
+    <div class="proc-title"><div class="spinner"></div> Reviewing Incident</div>
     <div class="steps">
       <div class="step" id="s1"><div class="step-dot"></div>Frame extraction</div>
       <div class="step" id="s2"><div class="step-dot"></div>Pose estimation · YOLOv8</div>
       <div class="step" id="s3"><div class="step-dot"></div>Temporal analysis · Gemini</div>
-      <div class="step" id="s4"><div class="step-dot"></div>Referee decision · Claude</div>
+      <div class="step" id="s4"><div class="step-dot"></div>Referee decision · LLM</div>
       <div class="step" id="s5"><div class="step-dot"></div>Rendering verdict</div>
     </div>
     <div class="prog-track"><div class="prog-fill" id="prog"></div></div>
@@ -467,7 +571,7 @@
       <div class="verdict-pill" id="vPill">—</div>
       <div>
         <div class="conf" id="confNum">—</div>
-        <div class="conf-label">confidence</div>
+        <div class="conf-label">Confidence</div>
       </div>
     </div>
 
@@ -481,7 +585,7 @@
         <div class="cell-value" id="rInit">—</div>
       </div>
       <div class="cell">
-        <div class="cell-label">Ball first</div>
+        <div class="cell-label">Ball First</div>
         <div class="cell-value" id="rBall">—</div>
       </div>
     </div>
@@ -492,18 +596,18 @@
         <div class="cell-value" id="rSev">—</div>
       </div>
       <div class="cell">
-        <div class="cell-label">Law</div>
-        <div class="cell-value" id="rLaw" style="font-size:12px; font-weight:500;">—</div>
+        <div class="cell-label">Law Reference</div>
+        <div class="cell-value" id="rLaw" style="font-size:14px; font-weight:600;">—</div>
       </div>
     </div>
 
     <div class="panel">
-      <div class="panel-head">Referee reasoning</div>
+      <div class="panel-head">Referee Reasoning</div>
       <div class="panel-body" id="rReason">—</div>
     </div>
 
     <div class="panel">
-      <div class="panel-head">Gemini — temporal analysis</div>
+      <div class="panel-head">Gemini — Temporal Analysis</div>
       <div class="panel-body" id="rGemini">—</div>
     </div>
 
