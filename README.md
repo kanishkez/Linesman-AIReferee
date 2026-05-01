@@ -2,6 +2,8 @@
 
 Linesman is a Video Assistant Referee (VAR) system that analyzes football match footage to evaluate incidents and make foul decisions according to FIFA Law 12. It utilizes a two-stage pipeline combining computer vision and multimodal large language models for objective analysis.
 
+![Linesman UI Analysis Example](assets/demo_ui.png)
+
 ## Architecture
 
 ```
