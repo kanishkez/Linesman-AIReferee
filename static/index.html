@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Linesman</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #1e1e1e;
+    --border-hover: #2e2e2e;
+    --text: #f0f0f0;
+    --muted: #555;
+    --dim: #333;
+    --red: #e02020;
+    --red-dim: rgba(224, 32, 32, 0.12);
+    --yellow: #d4a017;
+    --green: #2a9d5c;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "SF Pro Text", "SF Pro Display", BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 80px 24px 120px;
+  }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+  .nav-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: breathe 2.5s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .hero {
+    padding-top: 72px;
+    padding-bottom: 56px;
+  }
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 52px);
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 1.05;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--red);
+  }
+  .hero p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  .features {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  @media (max-width: 480px) {
+    .features { flex-direction: column; }
+  }
+  .feature-card {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .feature-card:hover {
+    border-color: var(--border-hover);
+  }
+  .feature-card svg {
+    width: 22px; height: 22px; stroke: var(--red); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 12px;
+  }
+  .feature-card h3 {
+    font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; letter-spacing: -0.2px;
+  }
+  .feature-card p {
+    font-size: 13px; color: var(--muted); line-height: 1.5;
+  }
+
+  .upload-zone {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 52px 32px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    background: var(--surface);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--border-hover);
+    background: #141414;
+  }
+  .upload-zone input {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer;
+    width: 100%; height: 100%;
+  }
+
+  .upload-icon {
+    width: 44px; height: 44px;
+    margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    background: #181818;
+    border: 1px solid var(--border);
+  }
+  .upload-icon svg { width: 20px; height: 20px; stroke: var(--muted); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  .upload-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .upload-sub {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .file-row {
+    display: none;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .file-row.visible { display: flex; }
+  .file-name-txt {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+  }
+  .file-size-txt { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .check { color: var(--green); font-size: 16px; }
+
+  video#thumb {
+    display: none;
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-top: 16px;
+  }
+  video#thumb.visible { display: block; }
+
+  .btn {
+    display: none;
+    width: 100%;
+    margin-top: 16px;
+    padding: 15px;
+    background: var(--red);
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    color: #fff;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn.visible { display: block; }
+  .btn:hover { opacity: 0.88; }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .proc {
+    display: none;
+    margin-top: 32px;
+    padding: 28px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+  .proc.visible { display: block; }
+
+  .proc-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.3px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .spinner {
+    width: 12px; height: 12px;
+    border: 1.5px solid var(--dim);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .steps { display: flex; flex-direction: column; gap: 12px; }
+  .step {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    transition: color 0.25s;
+  }
+  .step.active { color: var(--text); }
+  .step.done { color: var(--green); }
+  .step-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--dim);
+    flex-shrink: 0;
+    transition: background 0.25s;
+  }
+  .step.active .step-dot { background: var(--red); }
+  .step.done .step-dot { background: var(--green); }
+
+  .prog-track {
+    margin-top: 24px;
+    height: 1px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%;
+    background: var(--red);
+    width: 0%;
+    transition: width 0.6s ease;
+  }
+
+  .results {
+    display: none;
+    margin-top: 40px;
+    animation: up 0.4s ease forwards;
+  }
+  .results.visible { display: block; }
+  @keyframes up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .verdict-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .verdict-pill {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 100px;
+  }
+  .verdict-pill.foul, .verdict-pill.penalty, .verdict-pill.red_card {
+    background: var(--red-dim);
+    color: var(--red);
+    border: 1px solid rgba(224,32,32,0.25);
+  }
+  .verdict-pill.yellow_card {
+    background: rgba(212,160,23,0.1);
+    color: var(--yellow);
+    border: 1px solid rgba(212,160,23,0.25);
+  }
+  .verdict-pill.no_foul {
+    background: rgba(42,157,92,0.1);
+    color: var(--green);
+    border: 1px solid rgba(42,157,92,0.25);
+  }
+  .conf {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--text);
+  }
+  .conf-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    margin-top: 2px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+
+  .cell {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .cell-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 400;
+  }
+  .cell-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.2px;
+    text-transform: capitalize;
+  }
+  .cell-value.red { color: var(--red); }
+  .cell-value.yellow { color: var(--yellow); }
+  .cell-value.green { color: var(--green); }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .panel-head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+  .panel-body {
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #888;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .panel-body::-webkit-scrollbar { width: 3px; }
+  .panel-body::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 4px; }
+
+  .btn-ghost {
+    margin-top: 24px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-ghost:hover { border-color: var(--dim); color: var(--text); }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">Linesman</span>
+  <div class="nav-dot"></div>
+</nav>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>The ref that never <em>blinks.</em></h1>
+    <p>Drop a clip. Get the call.</p>
+  </div>
+
+  <div class="features">
+    <div class="feature-card">
+      <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <h3>Fair & Objective</h3>
+      <p>No bias, no emotion. Just strict adherence to FIFA Law 12.</p>
+    </div>
+    <div class="feature-card">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <h3>Instant Analysis</h3>
+      <p>Powered by YOLOv8 and Gemini to catch what the human eye misses in seconds.</p>
+    </div>
+  </div>
+
+  <div class="upload-zone" id="zone">
+    <input type="file" id="file" accept="video/*"/>
+    <div class="upload-icon">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </div>
+    <div class="upload-label">Drop clip here</div>
+    <div class="upload-sub">MP4, MOV, AVI · up to 500MB</div>
+
+    <div class="file-row" id="fileRow">
+      <div>
+        <div class="file-name-txt" id="fName"></div>
+        <div class="file-size-txt" id="fSize"></div>
+      </div>
+      <span class="check">✓</span>
+    </div>
+  </div>
+
+  <video id="thumb" muted playsinline loop></video>
+
+  <button class="btn" id="btnGo">Analyze</button>
+
+  <div class="proc" id="proc">
+    <div class="proc-title"><div class="spinner"></div> Reviewing incident</div>
+    <div class="steps">
+      <div class="step" id="s1"><div class="step-dot"></div>Frame extraction</div>
+      <div class="step" id="s2"><div class="step-dot"></div>Pose estimation · YOLOv8</div>
+      <div class="step" id="s3"><div class="step-dot"></div>Temporal analysis · Gemini</div>
+      <div class="step" id="s4"><div class="step-dot"></div>Referee decision · Claude</div>
+      <div class="step" id="s5"><div class="step-dot"></div>Rendering verdict</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog"></div></div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="verdict-row">
+      <div class="verdict-pill" id="vPill">—</div>
+      <div>
+        <div class="conf" id="confNum">—</div>
+        <div class="conf-label">confidence</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="cell">
+        <div class="cell-label">Contact</div>
+        <div class="cell-value" id="rContact">—</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">Initiator</div>
+        <div class="cell-value" id="rInit">—</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">Ball first</div>
+        <div class="cell-value" id="rBall">—</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="cell">
+        <div class="cell-label">Severity</div>
+        <div class="cell-value" id="rSev">—</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">Law</div>
+        <div class="cell-value" id="rLaw" style="font-size:12px; font-weight:500;">—</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">Referee reasoning</div>
+      <div class="panel-body" id="rReason">—</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">Gemini — temporal analysis</div>
+      <div class="panel-body" id="rGemini">—</div>
+    </div>
+
+    <button class="btn-ghost" id="btnReset">Analyze another clip</button>
+  </div>
+
+</div>
+
+<script>
+  const zone    = document.getElementById('zone');
+  const fileIn  = document.getElementById('file');
+  const fileRow = document.getElementById('fileRow');
+  const fName   = document.getElementById('fName');
+  const fSize   = document.getElementById('fSize');
+  const thumb   = document.getElementById('thumb');
+  const btnGo   = document.getElementById('btnGo');
+  const proc    = document.getElementById('proc');
+  const results = document.getElementById('results');
+  const prog    = document.getElementById('prog');
+  const btnReset= document.getElementById('btnReset');
+
+  let file = null;
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f?.type.startsWith('video/')) pick(f);
+  });
+  fileIn.addEventListener('change', () => fileIn.files[0] && pick(fileIn.files[0]));
+
+  function pick(f) {
+    file = f;
+    fName.textContent = f.name;
+    fSize.textContent = (f.size / 1024 / 1024).toFixed(1) + ' MB';
+    fileRow.classList.add('visible');
+    thumb.src = URL.createObjectURL(f);
+    thumb.classList.add('visible');
+    thumb.play();
+    btnGo.classList.add('visible');
+  }
+
+  btnGo.addEventListener('click', () => {
+    btnGo.disabled = true;
+    proc.classList.add('visible');
+    results.classList.remove('visible');
+    animate();
+  });
+
+  function animate() {
+    // Reset steps
+    const ids = ['s1','s2','s3','s4','s5'];
+    ids.forEach(id => document.getElementById(id).classList.remove('active','done'));
+    document.getElementById('s1').classList.add('active');
+    prog.style.width = '12%';
+
+    const fd = new FormData(); 
+    fd.append('video', file);
+    
+    fetch('/api/analyze', { method:'POST', body:fd })
+      .then(r => r.json())
+      .then(data => {
+        if(data.job_id) {
+           pollStatus(data.job_id);
+        } else {
+           alert("Error starting analysis: " + JSON.stringify(data));
+           btnReset.click();
+        }
+      })
+      .catch(e => {
+        alert("Error: " + e);
+        btnReset.click();
+      });
+  }
+
+  function pollStatus(jobId) {
+    fetch('/api/status/' + jobId)
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'completed') {
+           document.getElementById('s4').classList.remove('active'); document.getElementById('s4').classList.add('done');
+           document.getElementById('s5').classList.add('active');
+           prog.style.width = '95%';
+           
+           fetch('/api/results/' + jobId)
+             .then(r => r.json())
+             .then(res => {
+                const dec = res.decision || {};
+                const gem = res.gemini || {};
+                
+                let verdict = 'no_foul';
+                if (dec.is_foul) {
+                    verdict = 'foul';
+                    if (dec.card_recommendation === 'yellow') verdict = 'yellow_card';
+                    if (dec.card_recommendation === 'red') verdict = 'red_card';
+                }
+
+                const d = {
+                    verdict: verdict,
+                    confidence: dec.confidence || 0.0,
+                    contact_type: gem.challenge_type || '—',
+                    initiator: '—',
+                    ball_played_first: gem.initial_contact_point ? (gem.initial_contact_point.toLowerCase().includes('ball') ? 'yes' : 'no') : '—',
+                    severity: dec.severity || 'none',
+                    law_reference: dec.fifa_law_reference || '—',
+                    reasoning: dec.reasoning || '—',
+                    gemini_summary: gem.scene_description || '—'
+                };
+                
+                document.getElementById('s5').classList.remove('active'); document.getElementById('s5').classList.add('done');
+                prog.style.width = '100%';
+                
+                setTimeout(() => show(d), 500);
+             });
+        } else if (data.status === 'error') {
+           alert("Analysis failed: " + data.error_message);
+           btnReset.click();
+        } else {
+           if (data.status === 'yolo_processing') {
+               document.getElementById('s1').classList.remove('active'); document.getElementById('s1').classList.add('done');
+               document.getElementById('s2').classList.add('active');
+               prog.style.width = '32%';
+           } else if (data.status === 'gemini_analyzing') {
+               document.getElementById('s2').classList.remove('active'); document.getElementById('s2').classList.add('done');
+               document.getElementById('s3').classList.add('active');
+               prog.style.width = '56%';
+           } else if (data.status === 'rules_engine') {
+               document.getElementById('s3').classList.remove('active'); document.getElementById('s3').classList.add('done');
+               document.getElementById('s4').classList.add('active');
+               prog.style.width = '76%';
+           }
+           setTimeout(() => pollStatus(jobId), 2000);
+        }
+      })
+      .catch(e => {
+          console.error("Polling error: ", e);
+          setTimeout(() => pollStatus(jobId), 2000);
+      });
+  }
+
+  const sevCol = { none:'green', careless:'yellow', reckless:'red', excessive_force:'red' };
+  const balCol = { yes:'green', no:'red' };
+
+  function show(d) {
+    proc.classList.remove('visible');
+    results.classList.add('visible');
+
+    const pill = document.getElementById('vPill');
+    pill.textContent = d.verdict.replace(/_/g,' ');
+    pill.className = 'verdict-pill ' + d.verdict;
+
+    document.getElementById('confNum').textContent = Math.round(d.confidence * 100) + '%';
+    document.getElementById('rContact').textContent = d.contact_type || '—';
+    document.getElementById('rInit').textContent = d.initiator || '—';
+
+    const b = document.getElementById('rBall');
+    b.textContent = d.ball_played_first === 'yes' ? 'Yes' : d.ball_played_first === 'no' ? 'No' : 'Unclear';
+    b.className = 'cell-value ' + (balCol[d.ball_played_first] || '');
+
+    const s = document.getElementById('rSev');
+    s.textContent = (d.severity || '—').replace(/_/g,' ');
+    s.className = 'cell-value ' + (sevCol[d.severity] || '');
+
+    document.getElementById('rLaw').textContent = d.law_reference || '—';
+    document.getElementById('rReason').textContent = d.reasoning || '—';
+    document.getElementById('rGemini').textContent = d.gemini_summary || '—';
+  }
+
+  btnReset.addEventListener('click', () => {
+    file = null; fileIn.value = '';
+    fileRow.classList.remove('visible');
+    thumb.classList.remove('visible'); thumb.src = '';
+    btnGo.classList.remove('visible'); btnGo.disabled = false;
+    proc.classList.remove('visible');
+    results.classList.remove('visible');
+    prog.style.width = '0%';
+    ['s1','s2','s3','s4','s5'].forEach(id => {
+      document.getElementById(id).classList.remove('active','done');
+    });
+  });
+</script>
+</body>
+</html>
